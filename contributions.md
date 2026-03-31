@@ -43,6 +43,7 @@ reason).
 | **@T-N-T-O**       | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **@dorianrother**  | 25.03   | https://github.com/remoweirich/sopra-fs26-group-15-server/commit/722b5a22b0c225506954c804cc9d436302777586 | Implementation of User Story 3 | Users can now join a lobby and request a list of all active lobbies |
+| 31.03   | https://github.com/remoweirich/sopra-fs26-group-15-server/commit/cf248622066c41e248283d5f1d932aa3f3c636ea | Tested multiple approaches for fetching data and calculating the current positions of trains from external apis. Final version implements the websockets api from geops | Realizes the core functionality of the webapp - Interpreting real-life transportation data |
 
 
 ---
