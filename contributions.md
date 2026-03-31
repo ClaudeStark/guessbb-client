@@ -42,7 +42,8 @@ reason).
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **@T-N-T-O**       | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **@dorianrother**  | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **@dorianrother**  | 25.03   | https://github.com/remoweirich/sopra-fs26-group-15-server/commit/722b5a22b0c225506954c804cc9d436302777586 | Implementation of User Story 3 | Users can now join a lobby and request a list of all active lobbies |
+
 
 ---
 
