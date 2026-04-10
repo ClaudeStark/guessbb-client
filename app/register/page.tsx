@@ -12,67 +12,82 @@ Classnames used:
 import { useRouter } from "next/navigation"; // use NextJS router for navigation
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { User } from "@/types/user";
+import { RegisterPostDTO, UserAuthDTO, LoginPostDTO } from "@/types/user";
 import { Button, Form, Input } from "antd";
-// Optionally, you can import a CSS module or file for additional styling:
-// import styles from "@/styles/page.module.css";
 
-interface FormFieldProps {
-  label: string;
-  value: string;
-}
 
 const Register: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
   const [form] = Form.useForm();
-  // useLocalStorage hook example use
-  // The hook returns an object with the value and two functions
-  // Simply choose what you need from the hook:
-  const {
-    // value: token, // is commented out because we do not need the token value
-    set: setToken, // we need this method to set the value of the token to the one we receive from the POST request to the backend server API
-    // clear: clearToken, // is commented out because we do not need to clear the token when logging in
-  } = useLocalStorage<string>("token", ""); // note that the key we are selecting is "token" and the default value we are setting is an empty string
-  // if you want to pick a different token, i.e "usertoken", the line above would look as follows: } = useLocalStorage<string>("usertoken", "");
 
-  const handleRegistration = async (values: FormFieldProps) => {
-    router.push("/users/1"); // TODO: replace with actual new user ID from response
+  const {set: setToken} = useLocalStorage<string>("token", "");
+
+
+  const handleRegistration = async (values: RegisterPostDTO) => {
+    try {
+      await apiService.post<UserAuthDTO>("/register", values);
+      const loginCredentials: LoginPostDTO = {
+        username: values.username,
+        password: values.password,
+      }
+      const response = await apiService.post<UserAuthDTO>("/login", loginCredentials)
+      setToken(response.token)
+      router.push(`/users/${response.userId}`)
+
+    } catch (error) {
+
+      console.error("Registration failed:", error);
+    }
   };
 
   return (
-   <div className="page-center page-content" >
-    <div className="card card--form">
+    <div className="page-center page-content" >
+      <div className="card card--form">
         <h2 className="form-title">Create an Account</h2>
-      <Form
-        form={form}
-        name="login"
-        size="large"
-        variant="outlined"
-        onFinish={handleRegistration}
-        layout="vertical"
-      >
-        <Form.Item
-          name="username"
-          label="Username"
-          rules={[{ required: true, message: "Please input your username!" }]}
+        <Form
+          form={form}
+          name="login"
+          size="large"
+          variant="outlined"
+          onFinish={handleRegistration}
+          layout="vertical"
         >
-          <Input placeholder="Enter username" />
-        </Form.Item>
-        <Form.Item
-          name="name"
-          label="Name"
-          rules={[{ required: true, message: "Please input your name!" }]}
-        >
-          <Input placeholder="Enter name" />
-        </Form.Item>
-        <Form.Item>
-          <Button type="primary" htmlType="submit" className="login-button">
-            Register
-          </Button>
-        </Form.Item>
-      </Form>
-    </div>
+          <Form.Item
+            name="username"
+            label="Username"
+            rules={[{ required: true, message: "Please input your username!" }]}
+          >
+            <Input placeholder="Enter username" />
+          </Form.Item>
+          <Form.Item
+            name="email"
+            label="Email"
+            rules={[{ required: true, message: "Please input your email!" }]}
+          >
+            <Input placeholder="Enter email" />
+          </Form.Item>
+          <Form.Item
+            name="password"
+            label="Password"
+            rules={[{ required: true, message: "Please input your password!" }]}
+          >
+            <Input.Password />
+          </Form.Item>
+          <Form.Item
+            name="userBio"
+            label="UserBio"
+            rules={[{ required: false, message: "Please input your userBio!" }]}
+          >
+            <Input.TextArea placeholder="Enter username" />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" className="register-button">
+              Register
+            </Button>
+          </Form.Item>
+        </Form>
+      </div>
     </div>
   );
 };
