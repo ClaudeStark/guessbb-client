@@ -42,12 +42,13 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div className="page-center page-content" >
+    <div className="page-center page-content">
       <div className="card card--form">
         <h2 className="form-title">Create an Account</h2>
+        <p className="form-subtitle">Earn points and climb the leaderboard.</p>
         <Form
           form={form}
-          name="login"
+          name="register"
           size="large"
           variant="outlined"
           onFinish={handleRegistration}
@@ -56,37 +57,52 @@ const Register: React.FC = () => {
           <Form.Item
             name="username"
             label="Username"
-            rules={[{ required: true, message: "Please input your username!" }]}
+            rules={[{ required: true, message: "Please choose a username!" }]}
           >
-            <Input placeholder="Enter username" />
+            <Input placeholder="Pick a cool name" />
           </Form.Item>
           <Form.Item
             name="email"
             label="Email"
-            rules={[{ required: true, message: "Please input your email!" }]}
+            rules={[
+              { required: true, message: "Please enter your email!" },
+              { type: "email", message: "Please enter a valid email!" },
+            ]}
           >
-            <Input placeholder="Enter email" />
+            <Input placeholder="your@email.com" />
           </Form.Item>
           <Form.Item
             name="password"
             label="Password"
-            rules={[{ required: true, message: "Please input your password!" }]}
+            rules={[
+              { required: true, message: "Please enter a password!" },
+              { min: 6, message: "Min. 6 characters" },
+            ]}
           >
-            <Input.Password />
+            <Input.Password placeholder="Min. 6 characters" />
           </Form.Item>
           <Form.Item
             name="userBio"
-            label="UserBio"
-            rules={[{ required: false, message: "Please input your userBio!" }]}
+            label="Bio (optional)"
           >
-            <Input.TextArea placeholder="Enter username" />
+            <Input.TextArea
+              placeholder="Tell us about yourself"
+              rows={2}
+              maxLength={200}
+            />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" className="register-button">
-              Register
+            <Button type="primary" htmlType="submit" className="form-submit-btn">
+              Register & Play
             </Button>
           </Form.Item>
         </Form>
+        <div className="form-footer">
+          Already a member?{" "}
+          <span className="form-footer-link" onClick={() => router.push("/login")}>
+            Log in
+          </span>
+        </div>
       </div>
     </div>
   );
