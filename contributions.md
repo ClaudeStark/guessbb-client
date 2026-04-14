@@ -76,6 +76,8 @@ reason).
 | **@T-N-T-O**       | 14.04  | https://github.com/remoweirich/sopra-fs26-group-15-client/commit/9fc3a53ac02d1e7892f8da4ecbbd0ab3485c0997 | Styled LoginPage with Welcome back title, pill submit button, password dots, and sign up footer link | Users need a polished login experience with clear navigation to registration |
 |                    | 14.04  | https://github.com/remoweirich/sopra-fs26-group-15-client/commit/35fd448dba722bf8010ca6286e391fdd4c17f773 | Styled RegisterPage with subtitle, email validation, password min 6 chars, optional bio field, and Log in footer | Registration flow needs clear validation feedback and consistent design with LoginPage |
 |                    | 14.04  | https://github.com/remoweirich/sopra-fs26-group-15-client/commit/e3cc54bbc8a54e9364553f11886a407563126ea5 | Styled ProfilePage with avatar, online dot, 2x3 stat cards, Game History/Friends/Success tabs, and inline edit form | Users need to view their stats, game history, and edit their profile without leaving the page |
+| **@claudestark**   | 14.04   | https://github.com/remoweirich/sopra-fs26-group-15-client/commit/4199708b316361e0cb8526cadb5f59c23793e116 | Setup of register as well as login in frontend (minimal layout but working functionality/fetch) | Relevant for being able to interact woth the backend through the webbrowser |
+|                    | 14.04   | https://github.com/remoweirich/sopra-fs26-group-15-client/commit/a3c51ec5df020a774f34c2341636cda00f31367d | Setup frontend part of fetching a user, authorized and not authorized as well as changing api service to add another header | We will continue to need multiple headers for tasks coming. Relevant to show a users informaton |
 
 
 ---
