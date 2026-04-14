@@ -60,11 +60,15 @@ export class ApiService {
    * @param endpoint - The API endpoint (e.g. "/users").
    * @returns JSON data of type T.
    */
-  public async get<T>(endpoint: string): Promise<T> {
+  public async get<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
+
     const res = await fetch(url, {
+      ...options,
       method: "GET",
-      headers: this.defaultHeaders,
+      headers: {
+        ...this.defaultHeaders,
+        ...options.headers,}
     });
     return this.processResponse<T>(
       res,

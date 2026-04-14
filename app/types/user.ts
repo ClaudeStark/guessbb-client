@@ -21,3 +21,19 @@ export interface LoginPostDTO{
   username: string;
   password: string;
 }
+
+export interface UserScoreboard{
+  totalPoints: number,
+  gamesPlayed: number,
+  gamesWon: number,
+  guessingPrecision: number
+}
+
+export interface MyUserDTO{
+  userScoreboard: UserScoreboard;
+  username: string,
+  email: string,
+  userBio: string,
+  creationDate: Date,
+  friends: User[]
+}
