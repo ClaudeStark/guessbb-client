@@ -54,14 +54,14 @@
  *   Local setInterval counts down; sync again on next ROUND_START.
  */
 
-import { use, useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 //import { useWebSocket } from "@/hooks/useWebSocket";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import { Message} from "@types/message";
+import { Message} from "@/types/message";
 import { Train } from "@/types/train";
 import { Round } from "@/types/round";
 import type { MessageType } from "@/types/messageType";
@@ -91,7 +91,10 @@ const GamePage: React.FC = () => {
   type UserResult = {
     userId: string;
     score: string;
-    guessCoordinates: [number, number];
+    totalscore: string;
+    xCoordinate: number;
+    yCoordinate: number;
+    distance: number;
   }
 
   type GuessMessagePayload = {
@@ -108,7 +111,8 @@ const GamePage: React.FC = () => {
 
   const [gameState,         setGameState]         = useState<GameState | null>("ROUND_IN_PROGRESS");
   const [currentTime,         setCurrentTime]         = useState<string>("");
-  const [secondsRemaining,  setSecondsRemaining]  = useState<number>(0);
+  const [timerActive,        setTimerActive]        = useState<boolean>(true);
+  const [secondsRemaining,  setSecondsRemaining]  = useState<number>(30);
   const [guessCoords,      setGuessCoords]      = useState<[number, number] | null>(null);
   const [guessSubmitted,   setGuessSubmitted]   = useState<boolean>(false);
   const [clickPosition, setClickPosition] = useState<null | [number, number]>(
@@ -118,6 +122,7 @@ const GamePage: React.FC = () => {
   const [currentRound, setCurrentRound] = useState<number | null>(null);
   const [maxRounds, setMaxRounds] = useState<number | null>(null);
   const [results, setResults] = useState<{currentRound: number; userResults: [UserResult]; train: Train} | null>(null); // Replace 'any' with your actual score type
+  const [totalResults, setTotalResults] = useState<[{userId: string; score: number}] | null>(null); // Replace 'any' with your actual total results type
 
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -132,10 +137,59 @@ const GamePage: React.FC = () => {
     setMounted(true);
   }, []);
 
+    // ── Guess submission ─────────────────────────────────────────────────────
+  const handleSubmitGuess = async () => {
+    if (!clickPosition) return;
+
+    const [lon, lat] = clickPosition;
+
+    const payload: GuessMessagePayload = {
+      lobbyId: gameId!,
+      userId: userId!, 
+      token: token,
+      lat: lat, 
+      lon: lon 
+  };
+
+    console.log("Guess:", payload);
+  
+    if (!clientRef.current || !clientRef.current.connected) {
+      console.warn("WebSocket not connected yet");
+      return;
+    }
+    
+    
+    clientRef.current.publish({
+      destination: `/app/game/${gameId}/guess`,
+      body: JSON.stringify({
+        type: "GUESS_MESSAGE",
+        payload: payload
+        })
+      });
+    setGuessCoords([lat, lon]); // record for later use (e.g. showing pin)
+
+    setGuessSubmitted(true);
+    console.log("Guess submitted:", payload);
+  }
+
   // ── Local countdown timer ────────────────────────────────────────────────
   useEffect(() => {
-    setCurrentTime(Date.now().toString());
-  }, [secondsRemaining]);
+    const timer = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString());
+      if (gameState === "ROUND_IN_PROGRESS" && timerActive) {
+        setSecondsRemaining((prev) => (prev > 0 ? prev - 1 : 0));
+      }
+      if (secondsRemaining <= 0 && !guessSubmitted) {
+            handleSubmitGuess(); // auto-submit when timer runs out
+            
+          }
+
+    }, 1000);
+    
+    
+    // Clean up the timer when the component unmounts
+    return () => clearInterval(timer);
+    }, [handleSubmitGuess, guessSubmitted]);
 
   useEffect(() => {
     
@@ -175,7 +229,7 @@ const GamePage: React.FC = () => {
         onConnect: () => { 
           console.log("Connected!");
 
-            // Subscribe to lobby topic
+            // Subscribe to game topic
             stompClient.subscribe(`/topic/game/${gameId}`, (message) => {
               const update: Message = JSON.parse(message.body);
 
@@ -206,7 +260,7 @@ const GamePage: React.FC = () => {
     };
   }, [gameId]);  
 
-  const handleMessage = (message: Message) => {
+  const handleMessage = useCallback((message: Message) => {
     switch (message.type) {
       case "ROUND_START":
         console.log("Round started:", message);
@@ -218,7 +272,9 @@ const GamePage: React.FC = () => {
         setMaxRounds(message.payload.maxRounds);
         setGameState("ROUND_IN_PROGRESS");
         //start the local timer for 30 seconds
-        
+        setSecondsRemaining(30);
+        setTimerActive(true);
+
         break;
 
       case "ROUND_END":
@@ -226,14 +282,18 @@ const GamePage: React.FC = () => {
         if (guessCoords && !guessSubmitted) {
           handleSubmitGuess();
         }
-        setGameState("BETWEEN_ROUNDS");
-        
+        //show loading screen until results have arrived
         // reset timer
+        setTimerActive(false);
         break;
       
       case "SCORES":
-        setResults(message.userResults);
-        setCurrentTrain(message.train)
+        console.log("Scores updated:", message);
+        setResults(message.payload); //total results contained in UserResult
+        
+        
+        setCurrentTrain(message.payload.train)
+        setGameState("BETWEEN_ROUNDS");
         break;
 
       case "GAME_END":
@@ -243,42 +303,9 @@ const GamePage: React.FC = () => {
         break;
     }
 
-  };
+  }, [guessCoords, guessSubmitted, handleSubmitGuess, gameId, router]);
 
-  // ── Guess submission ─────────────────────────────────────────────────────
-  const handleSubmitGuess = async () => {
-    if (!clickPosition) return;
 
-    const [lon, lat] = clickPosition;
-
-    const payload: GuessMessagePayload = {
-      lobbyId: gameId!,
-      userId: userId!, 
-      token: token,
-      lat: lat, 
-      lon: lon 
-  };
-
-    console.log("Guess:", payload);
-  
-    if (!clientRef.current || !clientRef.current.connected) {
-      console.warn("WebSocket not connected yet");
-      return;
-    }
-    
-    
-    clientRef.current.publish({
-      destination: `/app/game/${gameId}/guess`,
-      body: JSON.stringify({
-        type: "GUESS_MESSAGE",
-        payload: payload
-        })
-      });
-    setGuessCoords([lat, lon]); // record for later use (e.g. showing pin)
-
-    setGuessSubmitted(true);
-    console.log("Guess submitted:", payload);
-  }
  
   
   // ── Map click handler (passed from RMap component) ─────────────────────
@@ -344,7 +371,7 @@ const GamePage: React.FC = () => {
       {/* ── Question bar ────────────────────────────────────────────────── */}
       <div className="game-question-bar">
         <span className="game-question-bar-dot" />
-        Current time: {/*replace with component to return continous time */} – Where is the train NOW?
+        Current time: {currentTime} – Where is the train NOW?
       </div>
 
       {/* ── Map area ────────────────────────────────────────────────────── */}
@@ -410,7 +437,10 @@ const GamePage: React.FC = () => {
     else if (gameState === "BETWEEN_ROUNDS") {
       return <RoundOverview 
                 train={currentTrain}
-                results={results}/>
+                results={results?.userResults || []}
+                currentRound={currentRound}
+                maxRounds={maxRounds}
+                clientRef={clientRef.current}/>
                 
     }
     else {
