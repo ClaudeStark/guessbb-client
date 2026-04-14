@@ -70,6 +70,7 @@ reason).
 ## Contributions Week 3 - [Begin Date] to [End Date]
 
 | **@dorianrother**  | 9.4   | https://github.com/remoweirich/sopra-fs26-group-15-client/commit/7c3ebf13ad3f5b539945f8491958ab91dd941b1d | Integrated and visualized Map Component, implemented game logic, tested integration with mock websocket server for sending GUESS_MESSAGEs and recieving ROUND_START messages | This implements the core functionality of the game: The player is now able to see a interactable map and place and send their guess.  |
+| **@dorianrother**  | 14.4   | https://github.com/remoweirich/sopra-fs26-group-15-client/commit/67adb2a3a443fe8e16b5c602c0d5f5dc3cc5df0b | Implemented RoundOverview Component that shows results of the round, overall results and actual train position, and handles sending READY_FOR_NEXT_ROUND messages; tested against mock server | This allows the player to see their results after a round has ended and start the next round  |
 
 
 ---
