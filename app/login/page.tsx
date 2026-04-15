@@ -20,14 +20,10 @@ const Login: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
   const [form] = Form.useForm();
-<<<<<<< Updated upstream
-  const {set: setToken,  } = useLocalStorage<string>("token", ""); 
-
-=======
 
   const {set: setToken,  } = useLocalStorage<string>("token", "");
   const {set: setUserId} = useLocalStorage<number>("userId", -1); 
->>>>>>> Stashed changes
+
   const handleLogin = async (values: LoginPostDTO) => {
       try {
         const loginCredentials: LoginPostDTO = {
