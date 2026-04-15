@@ -77,6 +77,10 @@ const LobbiesPage: React.FC = () => {
   const handleJoin = async (lobbyId: number, userId: number, token: string, lobbyCodeDTO: LobbyCodeDTO) => {
     const {set: setLobbyCode} = useLocalStorage<string>("lobbyCode", "");
     setLobbyCode(lobbyCodeDTO.lobbyCode);
+    
+
+
+    router.push(`/lobbies/${lobbyId}`);
 
   };
 
