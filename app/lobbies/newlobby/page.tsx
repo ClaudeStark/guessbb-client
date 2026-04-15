@@ -31,7 +31,7 @@ import { Button, Form, Input, Radio, InputNumber } from "antd";
 import { CreateLobbyPostDTO, LobbyAccessDTO, LobbyCodeDTO } from "@/types/lobby";
 import handleJoin from "@/lobbies/page";
 
-const LobbyCreationPage: React.FC = () => {
+const NewLobbyPage: React.FC = () => {
   const router     = useRouter();
   const apiService = useApi();
   const [form]     = Form.useForm<CreateLobbyPostDTO>();
@@ -128,4 +128,4 @@ const LobbyCreationPage: React.FC = () => {
   );
 };
 
-export default LobbyCreationPage;
+export default NewLobbyPage;
