@@ -1,15 +1,9 @@
-export interface User {
-  id: string | null;
-  username: string | null;
-  token: string | null;
-  status: string | null;
-}
-
 export interface RegisterPostDTO{
   username: string;
   email: string;
   password: string;
   userBio: string | null;
+  isGuest: boolean;
 }
 
 export interface UserAuthDTO{
@@ -35,5 +29,13 @@ export interface MyUserDTO{
   email: string,
   userBio: string,
   creationDate: Date,
-  friends: User[]
+  friends: UserDTO[]
+}
+
+export interface UserDTO{
+  userScoreboard: UserScoreboard;
+  username: string,
+  userBio: string,
+  creationDate: Date,
+  friends: UserDTO[]
 }

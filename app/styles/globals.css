@@ -243,6 +243,12 @@ html, body {
 
 .navbar-search-input::placeholder { color: var(--gray-light); }
 
+.navbar-right{
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+}
+
 
 /* ═══════════════════════════════════════════════════════════════════════════
    4. PAGE SHELLS

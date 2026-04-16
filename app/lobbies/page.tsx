@@ -1,61 +1,34 @@
 "use client";
 
-/**
- * Lobby Overview Page  –  route: /lobbies
- *
- * 
- * ─────────────────────────────────────────────────────────────────────────────
- * Layout (inside page-content):
- *   .lobby-page-header     → title "🎮 Lobbies" + "New Lobby" button
- *   .lobby-list            → vertical stack of .lobby-row entries
- *     .lobby-row           → one lobby (name, status, host, rounds, visibility,
- *                            player count, Join button)
- *
- * Classnames (all in globals.css):
- *   page-root, page-content
- *   lobby-page-header, lobby-page-title, lobby-page-subtitle
- *   lobby-list
- *   lobby-row, lobby-row-left, lobby-row-right
- *   lobby-row-status-dot  (--open | --ingame)
- *   lobby-row-info, lobby-row-name, lobby-row-meta
- *   lobby-row-players
- *   badge  badge-open | badge-ingame | badge-public | badge-private
- 
- */
-
-import {useEffect, useMemo, useState} from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { Lobby, LobbyAccessDTO, LobbyCodeDTO } from "@/types/lobby";
 import { Button, Spin, Modal, Tooltip } from "antd";
+import { UserAuthDTO, RegisterPostDTO } from "@/types/user";
 
 type PendingAction =
-    | { type: "create" }
-    | { type: "join"; lobbyId: number; lobbyCode: string; }
-    | null;
+  | { type: "create" }
+  | { type: "join"; lobbyId: number; lobbyCode: string; }
+  | null;
 
 
 const LobbiesPage: React.FC = () => {
+  const router = useRouter();
+  const apiService = useApi();
+  const [lobbies, setLobbies] = useState<Lobby[]>([]);
+  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
+
+  const [loading, setLoading] = useState(true);
+  const [emptyLobbyList, setEmptyLobbyList] = useState(false);
   const [hasCredentials, setHasCredentials] = useState<boolean>(false);
   const [isAuthModalVisible, setIsAuthModalVisible] = useState(false);
 
-  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
+  const { set: setLobbyCode } = useLocalStorage<string>("lobbyCode", "");
 
-  const router     = useRouter();
-  const apiService = useApi();
-  //const { value: token } = useLocalStorage<string>("token", "");
-  const {set: setLobbyCode} = useLocalStorage<string>("lobbyCode", "");
-  const [lobbies, setLobbies]   = useState<Lobby[]>([]);
-  const [loading, setLoading]   = useState(true);
-  const [emptyLobbyList, setEmptyLobbyList] = useState(false);
 
-  // ── Fetch lobby list ────────────────────────────────────────────────────
   useEffect(() => {
-
-    const token = localStorage.getItem("token");
-    const userId = localStorage.getItem("userId");
-
 
     const fetchLobbies = async () => {
       const lobby1: Lobby = {
@@ -85,21 +58,26 @@ const LobbiesPage: React.FC = () => {
 
       try {
         const response = await apiService.get<Lobby[]>("/lobbies");
-        setLobbies(response);
+        const combindesdLobbies = [...response, lobby1, lobby2];
+        setLobbies(combindesdLobbies); // Only for testing - replace with response when backend is ready
+        //setLobbies(response);
+
         setLoading(false);
-        if (response.length === 0) {
+
+        if (combindesdLobbies.length === 0) {
           setEmptyLobbyList(true);
         }
       }
       catch (error) {
-      setLobbies([lobby1, lobby2]);
-      setLoading(false);
-      setEmptyLobbyList(false);
-      console.error("Error fetching lobbies:", error);
+
+        console.error("Error fetching lobbies:", error);
       }
     };
 
     fetchLobbies();
+
+    const token = localStorage.getItem("token");
+    const userId = localStorage.getItem("userId");
 
     setHasCredentials(!!token && !!userId);
 
@@ -107,7 +85,6 @@ const LobbiesPage: React.FC = () => {
 
 
   const handleCreateNewLobby = () => {
-    // 3. Use the state variable instead of calling a function
     if (hasCredentials) {
       router.push("/lobbies/newlobby");
     } else {
@@ -131,16 +108,36 @@ const LobbiesPage: React.FC = () => {
     }
   };
 
+  const handleJoin = async (lobbyId: number, lobbyCodeDTO: LobbyCodeDTO) => {
+
+    const userId = localStorage.getItem("userId");
+    const token = localStorage.getItem("token");
+
+    const response = await apiService.post<LobbyAccessDTO>(
+      `/lobbies/${lobbyId}`,
+      {
+        headers: {
+          userId: userId ? Number(userId) : null,
+          token: token ?? null,
+        },
+        lobbyCodeDTO,
+      }
+    );
+
+    setLobbyCode(response.lobbyCode);
+    router.push(`/lobbies/${response.lobbyId}`);
+  };
+
   const handleContinueAsGuest = async () => {
     if (!pendingAction) return;
-
     if (pendingAction.type === "create") {
-      router.push("/lobbies/newlobby");
-    }
 
-    if (pendingAction.type === "join") {
+      router.push("/lobbies/newlobby");
+
+    } else if (pendingAction.type === "join") {
+
       await handleJoin(
-          pendingAction.lobbyId,{ lobbyCode: pendingAction.lobbyCode }
+        pendingAction.lobbyId, { lobbyCode: pendingAction.lobbyCode }
       );
     }
 
@@ -148,25 +145,19 @@ const LobbiesPage: React.FC = () => {
     setPendingAction(null);
   };
 
-  const handleJoin = async (lobbyId: number, lobbyCodeDTO: LobbyCodeDTO) => {
+  const createGuestCredentials = () => {
+    const values: RegisterPostDTO = {
+      username: "",
+      email: "",
+      password: "",
+      isGuest: true,
+      userBio: ""
+    };
 
-    const userId = localStorage.getItem("userId");
-    const token = localStorage.getItem("token");
+    return values;
+  }
 
-    const response = await apiService.post<LobbyAccessDTO>(
-        `/lobbies/${lobbyId}`,
-        {
-          headers: {
-            userId: userId ? Number(userId) : null,
-            token: token ?? null,
-          },
-          lobbyCodeDTO,
-        }
-    );
 
-    setLobbyCode(response.lobbyCode);
-    router.push(`/lobbies/${response.lobbyId}`);
-  };
 
   // ── Render ──────────────────────────────────────────────────────────────
   return (
@@ -215,9 +206,9 @@ const LobbiesPage: React.FC = () => {
                 </div>
                 <Tooltip title={lobby.lobbyState !== "WAITING" ? "Game already started" : ""}>
                   <Button
-                      type="primary"
-                      onClick={() => handleJoinClick(lobby)}
-                      disabled={lobby.lobbyState !== "WAITING"}
+                    type="primary"
+                    onClick={() => handleJoinClick(lobby)}
+                    disabled={lobby.lobbyState !== "WAITING"}
                   >
                     Join
                   </Button>
@@ -228,31 +219,31 @@ const LobbiesPage: React.FC = () => {
         </div>
       )}
       <Modal
-          title="Continue as Guest?"
-          open={isAuthModalVisible}
-          onCancel={() => setIsAuthModalVisible(false)}
-          footer={[
-            // Guest Button (left-aligned or secondary style)
-            <Button key="guest" onClick={handleContinueAsGuest}>
-              Continue as Guest
-            </Button>,
+        title="Continue as Guest?"
+        open={isAuthModalVisible}
+        onCancel={() => setIsAuthModalVisible(false)}
+        footer={[
+          // Guest Button (left-aligned or secondary style)
+          <Button key="guest" onClick={handleContinueAsGuest}>
+            Continue as Guest
+          </Button>,
 
-            // Register Button
-            <Button key="register"
-                    type="primary"
-                    onClick={() => router.push("/register")}>
-              Register
-            </Button>,
+          // Register Button
+          <Button key="register"
+            type="primary"
+            onClick={() => router.push("/register")}>
+            Register
+          </Button>,
 
-            // Login Button (Primary action)
-            <Button
-                key="login"
-                type="primary"
-                onClick={() => router.push("/login")}
-            >
-              Login
-            </Button>,
-          ]}
+          // Login Button (Primary action)
+          <Button
+            key="login"
+            type="primary"
+            onClick={() => router.push("/login")}
+          >
+            Login
+          </Button>,
+        ]}
       >
         <p>
           You can log in or register to save your data. Feel free to continue as a guest,

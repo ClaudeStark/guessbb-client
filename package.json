@@ -14,6 +14,7 @@
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "@stomp/stompjs": "^7.3.0",
     "antd": "^6.0.0",
+    "lucide-react": "^1.8.0",
     "maplibre-gl": "^5.22.0",
     "maplibre-react-components": "^0.2.6",
     "next": "^15.5.7",

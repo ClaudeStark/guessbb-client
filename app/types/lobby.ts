@@ -13,8 +13,6 @@ export interface Lobby {
 }
 
 export interface CreateLobbyPostDTO {
-  userId: number;
-  token: string;
   lobbyName: string;
   size: number;
   visibility: "PUBLIC" | "PRIVATE";

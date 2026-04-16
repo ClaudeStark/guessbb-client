@@ -1,27 +1,5 @@
 "use client";
 
-/**
- * Lobby Creation Screen  –  route: /lobbycreation
- *
-
- * Layout (inside page-center):
- *   .card.card--form
- *     .form-title          →  "🎯 New Lobby"
- *     .form-subtitle       →  "Set up your game."
- *     Ant Design Form
- *       Form.Item  "Lobby Name"   →  Input
- *       Form.Item  "Rounds"       →  custom round-selector (1 / 3 / 5 / 10)
- *       Form.Item  "Visibility"   →  custom visibility-selector (Public / Private)
- *       Form.Item  (submit)       →  Button "Create & Wait for Players"
- *
- * Classnames (all in globals.css):
- *   page-center
- *   card, card--form
- *   form-title, form-subtitle, form-submit-btn
- *   (round-selector & visibility-selector UI to be built as concrete components)
- *
-
- */
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -40,11 +18,21 @@ const NewLobbyPage: React.FC = () => {
 
   // ── Submit ──────────────────────────────────────────────────────────────
   const handleCreate = async (createLobbyPostDTO: CreateLobbyPostDTO) => {
-    const response = await apiService.post<LobbyAccessDTO>("/lobbies", createLobbyPostDTO);
+    const token = JSON.parse(localStorage.getItem("token") || '""') as string;
+    const userId = Number(localStorage.getItem("userId") || "-1");
+
+    const response = await apiService.post<LobbyAccessDTO>("/lobbies", {
+        headers: {
+          userId: userId ? Number(userId) : null,
+          token: token ?? null,
+        },
+        createLobbyPostDTO,
+      });
+
     const lobbyCodeDTO: LobbyCodeDTO = {
       lobbyCode: response.lobbyCode};
 
-    handleJoin({ lobbyId: response.lobbyId, userId: response.userId, token: response.token, lobbyCodeDTO });
+    //handleJoin({ lobbyId: response.lobbyId, userId: response.userId, token: response.token, lobbyCodeDTO });
     
   };
 

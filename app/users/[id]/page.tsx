@@ -3,8 +3,9 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { MyUserDTO } from "@/types/user";
+import { MyUserDTO, UserDTO } from "@/types/user";
 import { useApi } from "@/hooks/useApi";
+import { fetchUser } from "@/utils/fetchUser";
 import { Button, Tabs, Input, Form } from "antd";
 
 // Dummy Game History
@@ -23,34 +24,46 @@ function formatNumber(n: number): string {
 const Profile: React.FC = () => {
   const apiService = useApi();
   const router = useRouter();
-  const { value: token } = useLocalStorage<string | null>("token", null);
-  const userId = useParams().id;
-  const [user, setUser] = useState<MyUserDTO | null>(null);
+  const profileId = Number(useParams().id);
+  const [user, setUser] = useState<MyUserDTO | UserDTO | null>(null);
   const [editing, setEditing] = useState(false);
   const [form] = Form.useForm();
 
+
+
   useEffect(() => {
-    if (token == null) return;
-    if (!token) {
-      router.push("/login");
-    }
+    const token = JSON.parse(localStorage.getItem("token") || '""') as string;
+
     const fetchUser = async () => {
       try {
-        const userData = await apiService.get<MyUserDTO>(
-          `/users/${Number(userId)}`,
+        const userData = await apiService.get(
+          `/users/${Number(profileId)}`,
           {
             headers: { token: token },
           }
-        );
-        setUser(userData);
-      } catch (error) {
-        console.log(error);
+        ) as MyUserDTO | UserDTO;
+
+
+        if ("email" in userData) {
+          return userData as MyUserDTO;
+        } else {
+          return userData as UserDTO;
+
+        }
       }
-    };
-    if (userId) {
-      fetchUser();
+      catch (error) {
+        throw error
+      }
     }
-  }, [token, userId, router]);
+
+    fetchUser()
+      .then((data) => setUser(data))
+      .catch((error) => {
+        console.error("Failed to fetch user data:", error);
+        router.push("/login");
+      });
+
+  }, [router]);
 
   if (!user) {
     return (
@@ -63,10 +76,10 @@ const Profile: React.FC = () => {
   const initial = user.username ? user.username[0].toUpperCase() : "?";
   const creationDate = user.creationDate
     ? new Date(user.creationDate).toLocaleDateString("de-CH", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    })
     : "";
 
   const scoreboard = user.userScoreboard;
@@ -87,21 +100,21 @@ const Profile: React.FC = () => {
   };
 
   const handleSave = async (values: { username: string; userBio: string; password: string }) => {
-  try {
-    await apiService.put(`/users/${Number(userId)}`, {
-      username: values.username,
-      userBio: values.userBio,
-      password: values.password || undefined,
-      email: user.email,
-      userId: Number(userId),
-      token: token,
-    });
-    setUser({ ...user, username: values.username, userBio: values.userBio });
-    setEditing(false);
-  } catch (error) {
-    console.error("Update failed:", error);
-  }
-};
+    /*try {
+      await apiService.put(`/users/${Number(profileId)}`, {
+        username: values.username,
+        userBio: values.userBio,
+        password: values.password || undefined,
+        email: user.email,
+        userId: Number(userId),
+        token: token,
+      });
+      setUser({ ...user, username: values.username, userBio: values.userBio });
+      setEditing(false);
+    } catch (error) {
+      console.error("Update failed:", error);
+    }*/
+  };
 
   return (
     <div className="page-root page-content">

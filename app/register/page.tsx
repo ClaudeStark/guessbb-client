@@ -22,9 +22,12 @@ const Register: React.FC = () => {
   const [form] = Form.useForm<RegisterPostDTO>();
 
   const {set: setToken} = useLocalStorage<string>("token", "");
+  const {set: setUserId} = useLocalStorage<number>("userId", -1);
 
 
   const handleRegistration = async (values: RegisterPostDTO) => {
+    values.isGuest = false;
+    
     try {
       await apiService.post<UserAuthDTO>("/register", values);
       const loginCredentials: LoginPostDTO = {
@@ -33,6 +36,8 @@ const Register: React.FC = () => {
       }
       const response = await apiService.post<UserAuthDTO>("/login", loginCredentials)
       setToken(response.token)
+      setUserId(response.userId)
+
       router.push(`/users/${response.userId}`)
 
     } catch (error) {
@@ -66,7 +71,7 @@ const Register: React.FC = () => {
             label="Email"
             rules={[
               { required: true, message: "Please enter your email!" },
-              { type: "email", message: "Please enter a valid email!" },
+              //{ type: "email", message: "Please enter a valid email!" },
             ]}
           >
             <Input placeholder="your@email.com" />
@@ -76,7 +81,7 @@ const Register: React.FC = () => {
             label="Password"
             rules={[
               { required: true, message: "Please enter a password!" },
-              { min: 6, message: "Min. 6 characters" },
+              //{ min: 6, message: "Min. 6 characters" },
             ]}
           >
             <Input.Password placeholder="Min. 6 characters" />
