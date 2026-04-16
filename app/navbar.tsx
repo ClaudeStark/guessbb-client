@@ -42,8 +42,9 @@ export default function Navbar() {
 
 
   useEffect(() => {
-    const token = JSON.parse(localStorage.getItem("token") || '""') as string;
-    const userId = Number(localStorage.getItem("userId") || "-1");
+    const token = JSON.parse(localStorage.getItem("token") || '""');
+const userId = JSON.parse(localStorage.getItem("userId") || "-1");
+    
 
     console.log("Navbar - Retrieved token from localStorage:", token);
     console.log("Navbar - Retrieved userId from localStorage:", userId);
@@ -70,7 +71,7 @@ export default function Navbar() {
         }
       }
       catch (error) {
-        console.error("Error fetching user data in Navbar:", error);
+        //console.error("Error fetching user data in Navbar:", error);
         setResolvedUser(null);
       }
 

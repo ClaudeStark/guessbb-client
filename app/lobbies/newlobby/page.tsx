@@ -21,6 +21,14 @@ const NewLobbyPage: React.FC = () => {
     const token = JSON.parse(localStorage.getItem("token") || '""') as string;
     const userId = Number(localStorage.getItem("userId") || "-1");
 
+    const payload = {
+    lobbyName: createLobbyPostDTO.lobbyName,
+    size: Number(createLobbyPostDTO.size),
+    maxRounds: Number(createLobbyPostDTO.maxRounds),
+    // WICHTIG: Boolean zu Enum-String konvertieren
+    visibility: createLobbyPostDTO.visibility ? "PUBLIC" : "PRIVATE", 
+  };
+
     console.log("NewLobbyPage - Retrieved token from localStorage:", token);
     console.log("NewLobbyPage - Retrieved userId from localStorage:", userId);
     console.log("NewLobbyPage - Lobby creation data:", createLobbyPostDTO);
@@ -28,7 +36,7 @@ const NewLobbyPage: React.FC = () => {
     // Aufruf mit 3 Argumenten:
     const response = await apiService.post<LobbyAccessDTO>(
       "/lobbies",              // 1. Endpoint
-      createLobbyPostDTO,      // 2. Data (Body) - schicke direkt das DTO
+      payload,      // 2. Data (Body) - schicke direkt das DTO
       {                        // 3. Options (Headers)
         headers: {
           token: token,
@@ -37,11 +45,14 @@ const NewLobbyPage: React.FC = () => {
       }
     );
 
+    localStorage.setItem("token", JSON.stringify(response.token)); 
+    localStorage.setItem("userId", JSON.stringify(response.userId));
+
     const lobbyCodeDTO: LobbyCodeDTO = {
       lobbyCode: response.lobbyCode
     };
 
-    //handleJoin({ lobbyId: response.lobbyId, userId: response.userId, token: response.token, lobbyCodeDTO });
+    handleJoin({ lobbyId: response.lobbyId, lobbyCodeDTO });
     
   };
 

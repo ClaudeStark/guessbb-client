@@ -63,8 +63,9 @@ const LobbiesPage: React.FC = () => {
         setLobbies(response);
 
         setLoading(false);
-
-        if (combindesdLobbies.length === 0) {
+        console.log("Fetched lobbies:", response.length);
+        if (response.length === 0) {
+          console.log("No lobbies found.");
           setEmptyLobbyList(true);
         }
       }
@@ -113,19 +114,21 @@ const LobbiesPage: React.FC = () => {
     const userId = localStorage.getItem("userId");
     const token = localStorage.getItem("token");
 
-    const response = await apiService.post<LobbyAccessDTO>(
-      `/lobbies/${lobbyId}`,
-      {
-        headers: {
-          userId: userId ? Number(userId) : null,
-          token: token ?? null,
-        },
-        lobbyCodeDTO,
-      }
-    );
+    // const response = await apiService.post<LobbyAccessDTO>(
+    //   `/lobbies/${lobbyId}`,
+    //   {
+    //     headers: {
+    //       userId: userId ? Number(userId) : null,
+    //       token: token ?? null,
+    //     },
+    //     lobbyCodeDTO,
+    //   }
+    // );
 
-    setLobbyCode(response.lobbyCode);
-    router.push(`/lobbies/${response.lobbyId}`);
+    // setLobbyCode(response.lobbyCode);
+    //router.push(`/lobbies/${response.lobbyId}`);
+    console.log("Joining lobby with ID:", lobbyId, "and code:", lobbyCodeDTO.lobbyCode , "using credentials - userId:", userId, "token:", token);
+
   };
 
   const handleContinueAsGuest = async () => {
