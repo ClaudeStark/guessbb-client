@@ -59,8 +59,8 @@ const LobbiesPage: React.FC = () => {
       try {
         const response = await apiService.get<Lobby[]>("/lobbies");
         const combindesdLobbies = [...response, lobby1, lobby2];
-        setLobbies(combindesdLobbies); // Only for testing - replace with response when backend is ready
-        //setLobbies(response);
+        //setLobbies(combindesdLobbies); // Only for testing - replace with response when backend is ready
+        setLobbies(response);
 
         setLoading(false);
 

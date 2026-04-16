@@ -21,16 +21,25 @@ const NewLobbyPage: React.FC = () => {
     const token = JSON.parse(localStorage.getItem("token") || '""') as string;
     const userId = Number(localStorage.getItem("userId") || "-1");
 
-    const response = await apiService.post<LobbyAccessDTO>("/lobbies", {
+    console.log("NewLobbyPage - Retrieved token from localStorage:", token);
+    console.log("NewLobbyPage - Retrieved userId from localStorage:", userId);
+    console.log("NewLobbyPage - Lobby creation data:", createLobbyPostDTO);
+
+    // Aufruf mit 3 Argumenten:
+    const response = await apiService.post<LobbyAccessDTO>(
+      "/lobbies",              // 1. Endpoint
+      createLobbyPostDTO,      // 2. Data (Body) - schicke direkt das DTO
+      {                        // 3. Options (Headers)
         headers: {
-          userId: userId ? Number(userId) : null,
-          token: token ?? null,
+          token: token,
+          userId: userId.toString(),
         },
-        createLobbyPostDTO,
-      });
+      }
+    );
 
     const lobbyCodeDTO: LobbyCodeDTO = {
-      lobbyCode: response.lobbyCode};
+      lobbyCode: response.lobbyCode
+    };
 
     //handleJoin({ lobbyId: response.lobbyId, userId: response.userId, token: response.token, lobbyCodeDTO });
     
@@ -59,7 +68,7 @@ const NewLobbyPage: React.FC = () => {
             {/*To Do: add Form.Item for all items */}
           
           <Form.Item
-            name="lobby name"
+            name="lobbyName"
             label="Lobby Name"
             rules={[{ required: true, message: "Please enter a lobby name!" }]}
           >
@@ -67,7 +76,7 @@ const NewLobbyPage: React.FC = () => {
           </Form.Item>
 
           <Form.Item
-            name="amount of players"
+            name="size"
             label="Amount of Players"
             rules={[{ required: true, message: "Please enter the amount of players!" }]}
           >
@@ -75,7 +84,7 @@ const NewLobbyPage: React.FC = () => {
           </Form.Item>
 
           <Form.Item
-            name="rounds"
+            name="maxRounds"
             label="Rounds"
             rules={[{ required: true, message: "Please select amount of rounds to be played!" }]}
           >
@@ -88,7 +97,7 @@ const NewLobbyPage: React.FC = () => {
           </Form.Item>
 
           <Form.Item
-            name="lobby visibility"
+            name="visibility"
             label="Lobby Visibility"
             rules={[{ required: true, message: "Please select a visibility option!" }]}
           >
