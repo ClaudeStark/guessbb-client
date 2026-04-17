@@ -24,11 +24,6 @@ export const useLobbyActions = () => {
     let userId = rawUserId ? JSON.parse(rawUserId) : -1;
     let token = rawToken ? JSON.parse(rawToken) : "";
 
-    if (!userId || !token) {
-        console.error("Nicht eingeloggt!");
-        return;
-    }
-
     try {
       const lobbyAccessDTO = await joinLobby(lobbyId, lobbyCodeDTO, Number(userId), token);
       //await connectToLobbyWebSocket(lobbyId, Number(userId), token);
