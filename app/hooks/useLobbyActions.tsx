@@ -34,16 +34,16 @@ export const useLobbyActions = () => {
       //await connectToLobbyWebSocket(lobbyId, Number(userId), token);
       //router.push(`/lobbies/${lobbyId}`);
       console.log("Lobby beigetreten, weiterleiten zur Lobby-Seite...");
-      console.log(lobbyAccesDTO);
-      userId = lobbyAccesDTO.userId;
-      token = lobbyAccesDTO.token;
+      console.log(lobbyAccessDTO);
+      userId = lobbyAccessDTO.userId;
+      token = lobbyAccessDTO.token;
 
       localStorage.setItem("token", JSON.stringify(token));
       localStorage.setItem("userId", JSON.stringify(userId));
 
       // 2. WebSocket: Standleitung öffnen
       // Wir schicken userId und token mit, damit der Interceptor im Backend uns lässt
-      connect(lobbyId, userId.toString(), token);
+      connect(userId.toString(), token);
       console.log("lobbyId before router push: ", lobbyId);
       router.push(`/lobbies/${lobbyId}`);
     } catch (error) {
