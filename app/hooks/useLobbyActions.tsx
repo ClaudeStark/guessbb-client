@@ -15,14 +15,13 @@ export const useLobbyActions = () => {
   const { connect } = useWebSocket(); // WebSocket-Funktion holen
 
   const handleJoin = async (lobbyId: number, lobbyCodeDTO: LobbyCodeDTO) => {
-    // 1. Roh-Daten holen
-    const rawUserId = localStorage.getItem("userId");
+ 
+    
     const rawToken = localStorage.getItem("token");
-
-    // 2. PARSEN, um die Anführungszeichen zu entfernen
-    // Wenn rawToken '"abc"' ist, wird token durch JSON.parse zu 'abc'
-    let userId = rawUserId ? JSON.parse(rawUserId) : -1;
     let token = rawToken ? JSON.parse(rawToken) : "";
+    const rawUserId = localStorage.getItem("userId");
+    let userId = rawUserId ? JSON.parse(rawUserId) : -1;
+
 
     try {
       const lobbyAccessDTO = await joinLobby(lobbyId, lobbyCodeDTO, Number(userId), token);
@@ -33,7 +32,7 @@ export const useLobbyActions = () => {
       userId = lobbyAccessDTO.userId;
       token = lobbyAccessDTO.token;
 
-      localStorage.setItem("token", JSON.stringify(token));
+      localStorage.setItem("token", JSON.stringify(token)); 
       localStorage.setItem("userId", JSON.stringify(userId));
 
       // 2. WebSocket: Standleitung öffnen
