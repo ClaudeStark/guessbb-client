@@ -79,7 +79,7 @@ const GamePage: React.FC = () => {
   const { id: gameId } = useParams<{ id: string }>();
   const apiService = useApi();
   const { value: token } = useLocalStorage<string>("token", "");
-  const { value: userId } = useLocalStorage<string>("userId", "1");
+  const { value: userId } = useLocalStorage<string>("userId", "1");//hardcoded for testing, needs to be set later with login
 
 
  type GameState = 
@@ -289,7 +289,7 @@ const GamePage: React.FC = () => {
         setGuessSubmitted(false);
         setClickPosition(null);
         setCurrentTrain(message.payload.train);
-        setCurrentRound(message.payload.currentRound);
+        setCurrentRound(message.payload.roundNumber);
         setMaxRounds(message.payload.maxRounds);
         setGameState("ROUND_IN_PROGRESS");
         //start the local timer for 30 seconds
