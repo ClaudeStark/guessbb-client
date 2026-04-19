@@ -59,8 +59,7 @@ import { useRouter, useParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 //import { useWebSocket } from "@/hooks/useWebSocket";
-import { Client } from "@stomp/stompjs";
-import SockJS from "sockjs-client";
+import { useWebSocket } from "@/context/WebSocketContext";
 import { Message} from "@/types/message";
 import { Train } from "@/types/train";
 import { Round } from "@/types/round";
@@ -72,13 +71,15 @@ import { RMap, RMarker } from "maplibre-react-components";
 import { MapLayerMouseEvent, MapLayerTouchEvent } from "maplibre-gl";
 import RoundOverview from "./RoundOverview";
 import LoadingScreen from "./LoadingScreen";
+import { latLngToEpsg, epsgToLatLng } from "./coordinateConverter";
 
 const GamePage: React.FC = () => {
   const router    = useRouter();
   const { id: gameId } = useParams<{ id: string }>();
   const apiService = useApi();
   const { value: token } = useLocalStorage<string>("token", "");
-  const { value: userId } = useLocalStorage<string>("userId", "");
+  const { value: userId } = useLocalStorage<string>("userId", "");//hardcoded for testing, needs to be set later with login
+  const { connect, disconnect, subscribe, publish, isConnected } = useWebSocket();
 
 
  type GameState = 
@@ -101,13 +102,12 @@ const GamePage: React.FC = () => {
     lobbyId: string;
     userId: string;
     token: string;
-    lat: number;
-    lon: number;
+    Xcoordinate: number;
+    Ycoordinate: number;
   }
 
 
   const [messages, setMessages] = useState<Message[]>([]);
-  const clientRef = useRef<Client | null>(null);
 
   const [gameState,         setGameState]         = useState<GameState | null>("ROUND_IN_PROGRESS");
   const [currentTime,         setCurrentTime]         = useState<string>("");
@@ -124,10 +124,7 @@ const GamePage: React.FC = () => {
   const [results, setResults] = useState<{currentRound: number; userResults: [UserResult]; train: Train} | null>(null); // Replace 'any' with your actual score type
   const [totalResults, setTotalResults] = useState<[{userId: string; score: number}] | null>(null); // Replace 'any' with your actual total results type
 
-
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const useMockServer = true;
 
 
   //prevent hidration error
@@ -143,29 +140,29 @@ const GamePage: React.FC = () => {
 
     const [lon, lat] = clickPosition;
 
+    //convert lat lon to other format
+    const [x, y] = latLngToEpsg(lat, lon);
+
     const payload: GuessMessagePayload = {
       lobbyId: gameId!,
       userId: userId!, 
       token: token,
-      lat: lat, 
-      lon: lon 
+      Xcoordinate: x, 
+      Ycoordinate: y 
   };
 
     console.log("Guess:", payload);
   
-    if (!clientRef.current || !clientRef.current.connected) {
+    if (!isConnected) {
       console.warn("WebSocket not connected yet");
       return;
     }
     
     
-    clientRef.current.publish({
-      destination: `/app/game/${gameId}/guess`,
-      body: JSON.stringify({
-        type: "GUESS_MESSAGE",
-        payload: payload
-        })
-      });
+    publish(`/app/game/${gameId}/guess`, {
+      type: "GUESS_MESSAGE",
+      payload: payload
+    });
     setGuessCoords([lat, lon]); // record for later use (e.g. showing pin)
 
     setGuessSubmitted(true);
@@ -197,68 +194,29 @@ const GamePage: React.FC = () => {
   
   // ── WebSocket – real-time game events ────────────────────────────────────
   useEffect(() => {
-    // Create SockJS connection
-    let stompClient: Client;
+    if (!isConnected) return;
 
-    if (useMockServer) {
-      // Native WebSocket — works directly with the mock server
-      stompClient = new Client({
-        webSocketFactory: () => new WebSocket("ws://localhost:8080"),
-        onConnect: () => { 
-          console.log("Connected!");
+    const subscription = subscribe<Message>(`/topic/game/${gameId}`, (update) => {
+      console.log("Received WS message:", update);
+      setMessages((prev) => [...prev, update]);
+      handleMessage(update);
+    });
 
-            // Subscribe to lobby topic
-            stompClient.subscribe(`/topic/game/${gameId}`, (message) => {
-              const update: Message = JSON.parse(message.body);
-              console.log("Received WS message:", update);
+    // Send initial ready message
+    publish(`/app/game/${gameId}/ready`, {
+      type: "READY_FOR_NEXT_ROUND",
+      payload: {
+        userId: userId,
+        isReady: true
+      }
+    });
 
-              // Update state → triggers re-render
-              setMessages((prev) => [...prev, update]);
+    console.log("Sent initial READY_FOR_NEXT_ROUND message");
 
-              handleMessage(update);
-            });
-        },
-        onDisconnect: () => {
-            console.log("Disconnected");
-          },
-      });
-    } else {
-      // SockJS — for the real backend
-      stompClient = new Client({
-        webSocketFactory: () => new SockJS("http://localhost:8080/ws"),
-        onConnect: () => { 
-          console.log("Connected!");
-
-            // Subscribe to game topic
-            stompClient.subscribe(`/topic/game/${gameId}`, (message) => {
-              const update: Message = JSON.parse(message.body);
-
-              console.log("Received WS message:", update);
-
-              // Update state → triggers re-render
-              setMessages((prev) => [...prev, update]);
-
-              handleMessage(update);
-            });
-        },
-
-        onDisconnect: () => {
-            console.log("Disconnected");
-          },
-      });
-    }
-
-    stompClient.activate();
-    clientRef.current = stompClient;
-
-
-    
-
-    // Cleanup on unmount
     return () => {
-      stompClient.deactivate();
+      if (subscription) subscription.unsubscribe();
     };
-  }, [gameId]);  
+  }, [isConnected, subscribe, publish, gameId, userId]);  
 
   const handleMessage = useCallback((message: Message) => {
     switch (message.type) {
@@ -268,7 +226,7 @@ const GamePage: React.FC = () => {
         setGuessSubmitted(false);
         setClickPosition(null);
         setCurrentTrain(message.payload.train);
-        setCurrentRound(message.payload.currentRound);
+        setCurrentRound(message.payload.roundNumber);
         setMaxRounds(message.payload.maxRounds);
         setGameState("ROUND_IN_PROGRESS");
         //start the local timer for 30 seconds
@@ -289,10 +247,30 @@ const GamePage: React.FC = () => {
       
       case "SCORES":
         console.log("Scores updated:", message);
-        setResults(message.payload); //total results contained in UserResult
+        //convert user guess coordinates
+        const userResults = message.payload.userResults.map((result: UserResult) => {
+          const [lat, lng] = epsgToLatLng(result.xCoordinate, result.yCoordinate);
+          return {
+            ...result,
+            xCoordinate: lat,
+            yCoordinate: lng,
+          };
+        });
+
+        setResults({
+          ...message.payload,
+          userResults,
+        }); //total results contained in UserResult
         
-        
-        setCurrentTrain(message.payload.train)
+        //convert train coordinates
+        const train = message.payload.train;
+
+        const [lat, lon]= epsgToLatLng(train.currentX, train.currentY)
+
+        train.currentX = lat;
+        train.currentY = lon;
+
+        setCurrentTrain(train)
         setGameState("BETWEEN_ROUNDS");
         break;
 
@@ -344,14 +322,14 @@ const GamePage: React.FC = () => {
       <div className="train-bar">
         {/* Line badge e.g. "S12" */}
         <span className="train-bar-line-badge">
-          {train?.trainId ?? "—"}
+          {train?.line.name ?? "—"}
         </span>
 
         {/* Route */}
         <span className="train-bar-route">
-          From {train?.lineOrigin}
+          From {train?.lineOrigin.stationName}
           <span className="train-bar-route-arrow"> → </span>
-          To {train?.lineDestination}
+          To {train?.lineDestination.stationName}
         </span>
 
         {/* Times */}
@@ -440,7 +418,7 @@ const GamePage: React.FC = () => {
                 results={results?.userResults || []}
                 currentRound={currentRound}
                 maxRounds={maxRounds}
-                clientRef={clientRef.current}/>
+                publish={publish}/>
                 
     }
     else {
