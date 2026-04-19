@@ -58,6 +58,7 @@ interface RoundOverviewProps {
 
 const RoundOverview: React.FC<RoundOverviewProps> = ({ train, results, currentRound, maxRounds, publish }) => {   
     
+    const router     = useRouter();  
     const { value: userId } = useLocalStorage<string>("userId", "1"); //hardcoded for testing, needs to be set later with login
     const { id: gameId } = useParams();
     const [unsortedResults, setUnsortedResults] = useState<UserResult[]>(results);
@@ -100,6 +101,11 @@ const RoundOverview: React.FC<RoundOverviewProps> = ({ train, results, currentRo
             }
         });
         console.log("Sent ready message for user" + userId)
+    }
+
+    const handleEndGame = async () => {
+      console.log("Ending Game")
+      router.push(`/game/${gameId}/leaderboard`)
     }
 
   return (
@@ -148,7 +154,7 @@ const RoundOverview: React.FC<RoundOverviewProps> = ({ train, results, currentRo
           </h2>
           <p className="result-panel-subtitle">
             {/* TODO: trainInfo.lineId · trainInfo.fromStation → trainInfo.toStation · trainInfo.currentTime */}
-            {train?.trainId} · {train?.lineOrigin?.stationName} → {train?.lineDestination?.stationName} · 12:21
+            {train?.line.name} · {train?.lineOrigin?.stationName} → {train?.lineDestination?.stationName} · {/*add current time */}
           </p>
         </div>
 
@@ -211,14 +217,37 @@ const RoundOverview: React.FC<RoundOverviewProps> = ({ train, results, currentRo
 
         {/* Footer: next-round button */}
         <div className="result-panel-footer">
-          <Button
+          {currentRound==maxRounds ? (
+            <Button
+            type="primary"
+            className="btn-full"
+            onClick={handleEndGame}
+          >
+            End Game
+          </Button>
+          ) : (
+            !readyForNextRound ? (
+            <Button
             type="primary"
             className="btn-full"
             onClick={handleReadyForNextRound}
           >
             {/* TODO: conditionally render "Waiting for host…" if !isHost */}
-            Next round (2/5) →
+            {/*If we want to render how many players are ready: Add additional websockets logic */}
+            Next round →
+          </Button>) : (
+            <Button
+            type="primary"
+            className="btn-full"
+          >
+            {/* TODO: conditionally render "Waiting for host…" if !isHost */}
+            {/*If we want to render how many players are ready: Add additional websockets logic */}
+            Waiting for other players →
           </Button>
+          )
+          )}
+          
+          
         </div>
 
       </aside>

@@ -112,20 +112,29 @@ const GamePage: React.FC = () => {
   const [gameState,         setGameState]         = useState<GameState | null>("ROUND_IN_PROGRESS");
   const [currentTime,         setCurrentTime]         = useState<string>("");
   const [timerActive,        setTimerActive]        = useState<boolean>(true);
-  const [secondsRemaining,  setSecondsRemaining]  = useState<number>(30);
+  const [secondsRemaining,  setSecondsRemaining]  = useState<number>(45);
   const [guessCoords,      setGuessCoords]      = useState<[number, number] | null>(null);
   const [guessSubmitted,   setGuessSubmitted]   = useState<boolean>(false);
   const [clickPosition, setClickPosition] = useState<null | [number, number]>(
     null,
-  );
+  );//[long, lat]
   const [currentTrain, setCurrentTrain] = useState<Train | null>(null);
+  const [departureTime, setDepartureTime] = useState<string | null>(null);
+  const [arrivalTime, setArrivalTime] = useState<string | null>(null);
   const [currentRound, setCurrentRound] = useState<number | null>(null);
   const [maxRounds, setMaxRounds] = useState<number | null>(null);
-  const [results, setResults] = useState<{currentRound: number; userResults: [UserResult]; train: Train} | null>(null); // Replace 'any' with your actual score type
-  const [totalResults, setTotalResults] = useState<[{userId: string; score: number}] | null>(null); // Replace 'any' with your actual total results type
+  const [results, setResults] = useState<{currentRound: number; userResults: [UserResult]; train: Train} | null>(null); 
+  const [totalResults, setTotalResults] = useState<[{userId: string; score: number}] | null>(null); 
+  const [stationPins, setStationPins] = useState<[[number, number], [number,number]] | null>(null); //[lat, long]
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const epochToTime = (epoch: number | null) : string => {
+    if (!epoch) {
+      return "";
+    }
+    return new Date(epoch).toISOString().slice(11, 16)}
+  ;
 
   //prevent hidration error
   const [mounted, setMounted] = useState(false);
@@ -215,6 +224,7 @@ const GamePage: React.FC = () => {
 
     return () => {
       if (subscription) subscription.unsubscribe();
+      console.log("Unsubscribed from websockets topic")
     };
   }, [isConnected, subscribe, publish, gameId, userId]);  
 
@@ -226,11 +236,25 @@ const GamePage: React.FC = () => {
         setGuessSubmitted(false);
         setClickPosition(null);
         setCurrentTrain(message.payload.train);
+        setDepartureTime(epochToTime(message.payload.train.departureTime));
+        setArrivalTime(epochToTime(message.payload.train.arrivalTime));
+        //get coordinates for origin and destination station
+        const origin = message.payload.train.lineOrigin;
+        const destination = message.payload.train.lineDestination;
+        const originCoords = epsgToLatLng(origin.xCoordinate, origin.yCoordinate)
+        const destCoords = epsgToLatLng(destination.xCoordinate, destination.yCoordinate)
+        setStationPins([originCoords, destCoords]);
+
+        setStationPins([message.payload.train.lineOrigin, message.payload.train.lineDestination].map((station) => 
+          epsgToLatLng(station.xCoordinate, station.yCoordinate)
+          
+        ))
+
         setCurrentRound(message.payload.roundNumber);
         setMaxRounds(message.payload.maxRounds);
         setGameState("ROUND_IN_PROGRESS");
-        //start the local timer for 30 seconds
-        setSecondsRemaining(30);
+        //start the local timer for 45 seconds
+        setSecondsRemaining(45);
         setTimerActive(true);
 
         break;
@@ -334,7 +358,7 @@ const GamePage: React.FC = () => {
 
         {/* Times */}
         <span className="train-bar-times">
-          Dep {train?.departureTime} · Arr {train?.arrivalTime}
+          Dep {departureTime} · Arr {arrivalTime}
         </span>
 
         {/* Round indicator + countdown */}
@@ -366,6 +390,12 @@ const GamePage: React.FC = () => {
             >
             {
               clickPosition && (<RMarker longitude={clickPosition[0]} latitude={clickPosition[1]}/>) 
+            }
+            {/*Markers for origin and destination stations*/}
+            {
+              stationPins?.map((station) => (
+                <RMarker longitude={station[1]} latitude={station[0]} color="green"/>
+              ))
             }
             {/* Floating hint / submit button at map bottom */}
             {clickPosition && !guessSubmitted && !guessCoords && (
