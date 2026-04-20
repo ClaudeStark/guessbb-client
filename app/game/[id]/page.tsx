@@ -178,6 +178,22 @@ const GamePage: React.FC = () => {
     console.log("Guess submitted:", payload);
   }
 
+
+  // added for fix with guess after time is up
+  const gameStateRef = useRef({
+    clickPosition,
+    guessSubmitted,
+    handleSubmitGuess
+  })
+
+  useEffect(() => {
+    gameStateRef.current = {
+      clickPosition,
+      guessSubmitted,
+      handleSubmitGuess
+    };
+  }, [clickPosition, guessSubmitted, handleSubmitGuess]);
+
   // ── Local countdown timer ────────────────────────────────────────────────
   useEffect(() => {
     const timer = setInterval(() => {
@@ -229,6 +245,12 @@ const GamePage: React.FC = () => {
   }, [isConnected, subscribe, publish, gameId, userId]);  
 
   const handleMessage = useCallback((message: Message) => {
+    const {
+      clickPosition: currentClick,
+      guessSubmitted: alreadySubmitted,
+      handleSubmitGuess: submitFn
+    } = gameStateRef.current;
+
     switch (message.type) {
       case "ROUND_START":
         console.log("Round started:", message);
@@ -260,12 +282,13 @@ const GamePage: React.FC = () => {
         break;
 
       case "ROUND_END":
-        //send current guess if not already sent
-        if (guessCoords && !guessSubmitted) {
-          handleSubmitGuess();
+        console.log("Round end received");
+        console.log("Current version in REF:", { currentClick, alreadySubmitted });
+
+        if (currentClick && !alreadySubmitted) {
+          console.log("Auto-Submit after ROUND_END");
+          submitFn();
         }
-        //show loading screen until results have arrived
-        // reset timer
         setTimerActive(false);
         break;
       
@@ -313,6 +336,7 @@ const GamePage: React.FC = () => {
   // ── Map click handler (passed from RMap component) ─────────────────────
   const handleMapClick = (e: MapLayerMouseEvent) => {
     setClickPosition(e.lngLat.toArray());
+
     
   };
   const handleMapClickTouch = (e: MapLayerTouchEvent) => {

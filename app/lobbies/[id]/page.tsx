@@ -1,7 +1,7 @@
 "use client";
 
 
-import { useEffect, useState } from "react";
+import {useEffect, useRef, useState} from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import { useWebSocket } from "@/context/WebSocketContext";
@@ -9,6 +9,7 @@ import { Lobby } from "@/types/lobby";
 import { LobbyMessage } from "@/types/lobbyMessage";
 import { App, Button} from "antd";
 import { useAuth } from "@/context/AuthContext";
+import {UserAuthDTO} from "@/types/user";
 
 
 const LobbyWaitPage: React.FC = () => {
@@ -23,6 +24,7 @@ const LobbyWaitPage: React.FC = () => {
   //const userId = JSON.parse(localStorage.getItem("userId") || '""') as number;
   const {user:currentUser, token} = useAuth();
     const [lobby, setLobby]   = useState<Lobby | null>(null);
+    const intentionalDisconnect = useRef<boolean>(false);
 
   
   // const [userData, setUserData] = useState< {userId: number; token: string} | null>(null);
@@ -99,12 +101,28 @@ useEffect(() => {
   };
 
   const handleLeave = async () => {
-    //   if (!webSocket.isConnected){
-    //     antdMessage.warning("Verbindung wird noch aufgebaut...");
-    //     return;
-    //   }
-    //   webSocket.publish(`/app/lobby/${lobbyId}/leave`, {});
-    // router.push("/lobbies"); // TODO: send leave request to backend, 
+    const destination = `/app/lobby/${lobbyId}/leave`;
+
+    if (!currentUser || !token) return;
+    else {
+      const payload: UserAuthDTO = {
+        userId: currentUser.userId,
+        token: token
+      }
+      const messageBody: LobbyMessage = {
+        type: "LEAVE_LOBBY",
+        payload: payload
+      }
+
+      webSocket.publish(destination, messageBody);
+      console.log("message published: ", messageBody);
+
+      intentionalDisconnect.current = true;
+      router.push(`/lobbies`);
+
+      webSocket.disconnect();
+      console.log("disconnected");
+    }
   };
 
   const updateLobbySettings = async () => {

@@ -12,7 +12,7 @@ const apiService = new ApiService();
 
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [user, setUser] = useState<{ userId: number; username: string } | null>(null);
+    const [user, setUser] = useState<{ userId: number, username: string } | null>(null);
     const [token, setToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
