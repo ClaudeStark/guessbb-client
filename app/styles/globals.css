@@ -140,8 +140,9 @@ html, body {
   align-items: center;
   gap: var(--sp-sm);
   text-decoration: none;
-  margin-right: var(--sp-xl);
   flex-shrink: 0;
+  flex: 1;
+  min-width: 0;
 }
 
 .navbar-brand-text {
@@ -211,10 +212,11 @@ html, body {
   display: flex;
   align-items: center;
   gap: var(--sp-sm);
-  margin-left: auto;
+  flex: 1;               /* claim equal share on the right */
+  justify-content: flex-end;
 }
 
-/* Lobby-ID search pill */
+/* Lobby-ID search pill — CENTERED in navbar */
 .navbar-search {
   display: flex;
   align-items: center;
@@ -223,12 +225,20 @@ html, body {
   border: 1px solid var(--gray-border);
   border-radius: var(--radius-pill);
   padding: 6px 14px;
-  min-width: 170px;
+  min-width: 200px;
+  max-width: 240px;
   cursor: text;
   transition: border-color 0.15s;
+  margin: 0 auto;  /* pushes the search into the centre */
 }
 
 .navbar-search:focus-within { border-color: var(--gray-mid); }
+
+/* Magnifier icon inside the search pill */
+.navbar-search-icon {
+  color: var(--gray-light);
+  flex-shrink: 0;
+}
 
 /* Raw <input> inside .navbar-search – Ant Design not used here */
 .navbar-search-input {
@@ -243,11 +253,22 @@ html, body {
 
 .navbar-search-input::placeholder { color: var(--gray-light); }
 
-.navbar-right{
-  display: flex;
+/* Register pill — the red "Registration" button in navbar (for guests) */
+.navbar-register-pill {
+  display: inline-flex;
   align-items: center;
-  gap: var(--sp-sm);
+  padding: 6px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--red);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s;
+  white-space: nowrap;
 }
+
+.navbar-register-pill:hover { background: var(--red-hover); color: #ffffff; }
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -359,7 +380,7 @@ html, body {
   gap: var(--sp-md);
   max-width: 900px;
   margin: 0 auto;
-  padding: 0 var(--sp-lg) var(--sp-xl);
+  padding: var(--sp-xl) var(--sp-lg) var(--sp-xl);
 }
 
 @media (max-width: 640px) {
@@ -1532,4 +1553,471 @@ html, body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--gray-light);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   14. HOME PAGE  (app/page.tsx)
+   ═══════════════════════════════════════════════════════════════════════════
+
+   .home-hero                – full hero section with mountains backdrop
+   .home-hero-mountains      – decorative SVG positioned behind hero content
+   .home-hero-content        – relative wrapper sitting above the mountains
+   .home-hero-illustration   – pin icon + train SVG row at top of hero
+   .home-hero-train          – small train SVG positioned next to the pin
+   .home-hero-title          – giant "GuessSBB" h1 (72px desktop)
+   .home-hero-tagline        – mono uppercase subtitle "Wo ist der Zug…"
+   .home-hero-description    – body paragraph under the tagline
+
+   .home-step-card           – one of the 3 how-it-works cards
+   .home-step-emoji-bg       – huge watermark emoji in card corner
+   .home-step-emoji          – visible emoji above the step number
+   .home-step-number         – "01" / "02" / "03" mono label
+   .home-step-number--red/gold/green – accent colour per step
+   .home-step-title          – card heading
+   .home-step-desc           – muted card body text
+
+   .home-stats-bar           – horizontal stats strip below the cards
+   .home-stat                – individual stat cell
+   .home-stat-emoji          – emoji above the value
+   .home-stat-value          – mono numeric value
+   .home-stat-value--small   – smaller variant (for text values like usernames)
+   .home-stat-label          – muted label below the value
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Hero section ──────────────────────────────────────────────────────── */
+.home-hero {
+  position: relative;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--sp-2xl) var(--sp-lg) var(--sp-xl);
+  text-align: center;
+  overflow: hidden;
+}
+
+.home-hero-mountains {
+  position: absolute;
+  bottom: -20px;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: auto;
+  opacity: 0.8;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.home-hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.home-hero-illustration {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  margin-bottom: var(--sp-md);
+}
+
+.home-hero-train {
+  width: 120px;
+  height: auto;
+  position: absolute;
+  top: -10px;
+  right: -70px;
+  transform: rotate(-5deg);
+  opacity: 0.9;
+}
+
+.home-hero-title {
+  font-size: 72px;
+  font-weight: 900;
+  color: var(--black);
+  margin: 0 0 var(--sp-sm);
+  letter-spacing: -0.05em;
+  line-height: 0.95;
+}
+
+.home-hero-tagline {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 14px;
+  color: var(--gray-light);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0 0 var(--sp-md);
+}
+
+.home-hero-description {
+  font-size: 19px;
+  color: var(--gray-mid);
+  max-width: 520px;
+  margin: 0 auto var(--sp-lg);
+  line-height: 1.7;
+}
+
+/* ── How-it-works step cards ───────────────────────────────────────────── */
+.home-step-card {
+  padding: var(--sp-lg);
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s, box-shadow 0.25s;
+  cursor: default;
+  border: 1px solid var(--gray-border);
+}
+
+.home-step-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-elevated);
+}
+
+.home-step-emoji-bg {
+  position: absolute;
+  top: -20px;
+  right: -10px;
+  font-size: 80px;
+  opacity: 0.08;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.home-step-emoji {
+  font-size: 36px;
+  margin-bottom: var(--sp-sm);
+  line-height: 1;
+}
+
+.home-step-number {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: var(--sp-sm);
+  letter-spacing: 0.05em;
+}
+
+.home-step-number--red   { color: var(--red); }
+.home-step-number--gold  { color: #E8B927; }
+.home-step-number--green { color: var(--green); }
+
+.home-step-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--black);
+  margin-bottom: var(--sp-sm);
+}
+
+.home-step-desc {
+  font-size: 14px;
+  color: var(--gray-mid);
+  line-height: 1.7;
+}
+
+/* ── Stats bar ─────────────────────────────────────────────────────────── */
+.home-stats-bar {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  gap: var(--sp-md);
+  padding: var(--sp-lg) var(--sp-xl);
+  margin-top: var(--sp-lg);
+}
+
+.home-stat {
+  text-align: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.home-stat-emoji {
+  font-size: 20px;
+  margin-bottom: 4px;
+  line-height: 1;
+}
+
+.home-stat-value {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--black);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.home-stat-value--small {
+  font-size: 14px;
+}
+
+.home-stat-label {
+  font-size: 12px;
+  color: var(--gray-mid);
+  margin-top: 4px;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   15. RESPONSIVE  –  Tablet & Mobile
+   ═══════════════════════════════════════════════════════════════════════════
+
+   Breakpoints:
+     ≤ 1024px  tablet
+     ≤ 640px   mobile
+     ≤ 380px   very small phones
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Tablet (≤ 1024px) */
+@media (max-width: 1024px) {
+  .home-hero {
+    padding: var(--sp-xl) var(--sp-lg);
+  }
+
+  .home-hero-title {
+    font-size: 56px;
+  }
+
+  .home-hero-train {
+    width: 90px;
+    right: -50px;
+  }
+}
+
+/* Mobile (≤ 640px) */
+@media (max-width: 640px) {
+  .home-hero {
+    padding: var(--sp-lg) var(--sp-md) var(--sp-xl);
+  }
+
+  .home-hero-title {
+    font-size: 44px;
+  }
+
+  .home-hero-tagline {
+    font-size: 12px;
+  }
+
+  .home-hero-description {
+    font-size: 16px;
+    margin-bottom: var(--sp-md);
+  }
+
+  /* Hide the train illustration — it overflows on narrow screens */
+  .home-hero-train {
+    display: none;
+  }
+
+  /* Stats bar: stack vertically */
+  .home-stats-bar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: var(--sp-md);
+    gap: var(--sp-md);
+  }
+
+  .home-stat {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-sm);
+    text-align: left;
+  }
+
+  .home-stat-emoji {
+    margin-bottom: 0;
+    font-size: 22px;
+  }
+
+  .home-stat-value {
+    flex: 1;
+    text-align: left;
+  }
+
+  .home-stat-label {
+    margin-top: 0;
+    font-size: 11px;
+    color: var(--gray-light);
+  }
+}
+
+/* Very small phones (≤ 380px) */
+@media (max-width: 380px) {
+  .home-hero-title {
+    font-size: 36px;
+  }
+
+  .page-hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .page-hero-actions .ant-btn {
+    width: 100%;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   16. BURGER MENU (mobile/tablet)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Burger button — hidden on desktop, shown on mobile */
+.navbar-burger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--black);
+  border-radius: var(--radius-sm);
+  transition: background 0.15s;
+}
+
+.navbar-burger:hover {
+  background: var(--bg-page);
+}
+
+/* Full-screen mobile menu overlay */
+.mobile-menu {
+  display: none;
+  position: fixed;
+  top: var(--nav-h);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-surface);
+  z-index: 99;
+  padding: var(--sp-xl) var(--sp-lg);
+  flex-direction: column;
+  gap: var(--sp-md);
+  overflow-y: auto;
+  animation: mobile-menu-slide-in 0.25s ease-out;
+}
+
+@keyframes mobile-menu-slide-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Search pill inside mobile menu — slightly larger */
+.mobile-menu-search {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  background: var(--bg-page);
+  border: 1px solid var(--gray-border);
+  border-radius: var(--radius-pill);
+  padding: 12px 18px;
+  width: 100%;
+}
+
+.mobile-menu-search:focus-within {
+  border-color: var(--gray-mid);
+}
+
+.mobile-menu-search .navbar-search-input {
+  font-size: 15px;
+}
+
+/* Each link in the mobile menu — full-width row */
+.mobile-menu-link {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  padding: var(--sp-md) var(--sp-lg);
+  background: var(--bg-page);
+  border: 1px solid var(--gray-border);
+  border-radius: var(--radius-md);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--black);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  font-family: inherit;
+  text-align: left;
+}
+
+.mobile-menu-link:hover {
+  background: var(--red-light);
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.mobile-menu-link--primary {
+  background: var(--red);
+  border-color: var(--red);
+  color: #ffffff;
+  justify-content: center;
+}
+
+.mobile-menu-link--primary:hover {
+  background: var(--red-hover);
+  border-color: var(--red-hover);
+  color: #ffffff;
+}
+
+.mobile-menu-link--muted {
+  color: var(--gray-mid);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   17. NAVBAR RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Tablet (≤ 1024px) — shrink search */
+@media (max-width: 1024px) {
+  .navbar {
+    padding: 0 var(--sp-md);
+  }
+
+  .navbar-search {
+    min-width: 140px;
+    max-width: 180px;
+  }
+
+  .navbar-brand {
+    margin-right: var(--sp-md);
+  }
+}
+
+/* Mobile (≤ 768px) — switch to burger menu */
+@media (max-width: 768px) {
+  /* Hide desktop search and actions */
+
+  
+  .navbar .navbar-search {
+    display: none;
+  }
+
+  .navbar .navbar-actions {
+    display: none;
+  }
+
+  /* Show the burger button */
+  .navbar-burger {
+    display: inline-flex;
+    margin-left: auto;
+  }
+
+  /* Show the mobile menu (toggled by JS state, the component conditionally
+     renders it, so this just makes sure the display flex kicks in) */
+  .mobile-menu {
+    display: flex;
+  }
+
+  .navbar-brand-text {
+    font-size: 18px;
+  }
+}
+
+/* Very small phones (≤ 480px) — hide secondary links, keep auth */
+@media (max-width: 480px) {
+  .navbar-actions > a[href="/lobbies"],
+  .navbar-actions > a[href="/leaderboard"] {
+    display: none;
+  }
+
+  .navbar-register-pill {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
 }
