@@ -92,7 +92,9 @@ reason).
 _Continue with the same table format as above._
 
 | **Student**        | **Date** | **Link to Commit** | **Description**                                                                                                  | **Relevance**                                                |
-| ------------------ |----------| ------------------ |------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------|
+| **@dorianrother |21.04| https://github.com/remoweirich/sopra-fs26-group-15-server/commit/4814e11d3ff847e832024031b79979759a685d72|Integration testing in the backend: Ensured successful interaction of front-end and backend in the main game loop; tested against the real geops API and improved the fetchers robustness; fixed multiple bugs | note: this commit is the last fix completed, everything on the branch corresponds to this task
+|
+| **@dorianrother |21.04|https://github.com/remoweirich/sopra-fs26-group-15-client/commit/fe6962c6225798ad633060a79580d77a18e3ce92 | Integration testing in the front-end and visual improvements; fixed multiple bugs | Users can now play the game and view an endgame screen, additional markers and arrival times - note: this commit is the last fix completed, everything from this week on the branch corresponds to this task |
 | **@snowjademusic** | 21.4     | https://github.com/remoweirich/sopra-fs26-group-15-server/commit/398295f638b682bdf9beb26b8f4c7897f4e69416 | Remove games and Lobbies from working memory by removing all references once game is done, persist stats into DB | Keep server memory clean so we don't use unnecessary compute |
 |                    | 21.4     | https://github.com/remoweirich/sopra-fs26-group-15-client/commit/7f05f0de8c329bf86ef1822f9d8a915445c511aa | show Leaderboard and GameResult after each game played                                                           | Significant part of the game.                                |
 
