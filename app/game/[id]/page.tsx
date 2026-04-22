@@ -215,9 +215,6 @@ const GamePage: React.FC = () => {
     return () => clearInterval(timer);
     }, [handleSubmitGuess, guessSubmitted]);
 
-  useEffect(() => {
-    
-}, []);
   
   // ── WebSocket – real-time game events ────────────────────────────────────
   useEffect(() => {
