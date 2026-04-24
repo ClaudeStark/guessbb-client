@@ -206,7 +206,7 @@ return (
                   </span>
                 </div>
                 <div className="lobby-row-meta">
-                  Host: {lobby.admin?.userId || "Unknown"} | Rounds: {lobby.maxRounds || 0} | Visibility: {lobby.visibility}
+                  Rounds: {lobby.maxRounds || 0} | Visibility: {lobby.visibility}
                 </div>
               </div>
             </div>

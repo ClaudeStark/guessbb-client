@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="9baeaeea-4fab-4319-844e-810556100fc0" name="Changes" comment="fix(homepage): Play button sends to lobbies always">
+    <list default="true" id="9baeaeea-4fab-4319-844e-810556100fc0" name="Changes" comment="fix(lobbies): fix rounds info on lobbies page">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/lobbies/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/lobbies/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/navbar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/navbar.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -263,7 +264,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777021063434</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="fix(lobbies): fix rounds info on lobbies page">
+      <option name="closed" value="true" />
+      <created>1777021496940</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1777021496940</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -297,7 +306,8 @@
     <MESSAGE value="feat(Game Leaderboard): display per game Leaderboard" />
     <MESSAGE value="fix(icon): remove favicon.ico so firefox too sees the new icon" />
     <MESSAGE value="fix(homepage): Play button sends to lobbies always" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix(homepage): Play button sends to lobbies always" />
+    <MESSAGE value="fix(lobbies): fix rounds info on lobbies page" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix(lobbies): fix rounds info on lobbies page" />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>
