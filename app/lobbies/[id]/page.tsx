@@ -42,7 +42,7 @@ const LobbyWaitPage: React.FC = () => {
               headers: {userId: currentUser.userId.toString(), token: token},
             }
             );
-        console.log(response); //to be removed
+        // console.log(response); //to be removed
         setLobby(response);
       } catch (e) {
         console.error("Fetch error: ", e);
@@ -68,9 +68,9 @@ useEffect(() => {
     const subscription = webSocket.subscribe<LobbyMessage>(
         `/topic/lobby/${lobbyId}`,
         (message) => {
-          console.log(message);
+          // console.log(message);
           if (message.type === "LOBBY_STATE") {
-            console.log("WebSocket Update received", message.payload);
+            // console.log("WebSocket Update received", message.payload);
             setLobby(message.payload);
           } else if (message.type === "GAME_START") {
             console.log(" Started");
@@ -122,7 +122,7 @@ useEffect(() => {
       }
 
       webSocket.publish(destination, messageBody);
-      console.log("message published: ", messageBody);
+      // console.log("message published: ", messageBody);
 
       intentionalDisconnect.current = true;
       router.push(`/lobbies`);
