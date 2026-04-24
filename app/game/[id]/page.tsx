@@ -162,7 +162,7 @@ const GamePage: React.FC = () => {
       Ycoordinate: y 
   };
 
-    console.log("Guess:", payload);
+    // console.log("Guess:", payload);
   
     if (!isConnected) {
       console.warn("WebSocket not connected yet");
@@ -177,7 +177,7 @@ const GamePage: React.FC = () => {
     setGuessCoords([lat, lon]); // record for later use (e.g. showing pin)
 
     setGuessSubmitted(true);
-    console.log("Guess submitted:", payload);
+    //console.log("Guess submitted:", payload);
   }
 
 
@@ -221,7 +221,7 @@ const GamePage: React.FC = () => {
     if (!isConnected) return;
 
     const subscription = subscribe<GameMessage>(`/topic/game/${gameId}`, (update) => {
-      console.log("Received WS message:", update);
+      //console.log("Received WS message:", update);
       setMessages((prev) => [...prev, update]);
       handleMessage(update);
     });
@@ -235,7 +235,7 @@ const GamePage: React.FC = () => {
       }
     });
 
-    console.log("Sent initial READY_FOR_NEXT_ROUND message");
+    //console.log("Sent initial READY_FOR_NEXT_ROUND message");
 
     return () => {
       if (subscription) subscription.unsubscribe();
@@ -252,7 +252,7 @@ const GamePage: React.FC = () => {
 
     switch (message.type) {
       case "ROUND_START":
-        console.log("Round started:", message);
+        //console.log("Round started:", message);
         setGuessCoords(null);
         setGuessSubmitted(false);
         setClickPosition(null);
@@ -277,18 +277,18 @@ const GamePage: React.FC = () => {
         break;
 
       case "ROUND_END":
-        console.log("Round end received");
-        console.log("Current version in REF:", { currentClick, alreadySubmitted });
+        // console.log("Round end received");
+        //console.log("Current version in REF:", { currentClick, alreadySubmitted });
 
         if (currentClick && !alreadySubmitted) {
-          console.log("Auto-Submit after ROUND_END");
+          // console.log("Auto-Submit after ROUND_END");
           submitFn();
         }
         setTimerActive(false);
         break;
       
       case "SCORES":
-        console.log("Scores updated:", message);
+        // console.log("Scores updated:", message);
         //convert user guess coordinates
         const userResults = message.payload.userResults.map((result: UserResult) => {
           const [lat, lng] = epsgToLatLng(result.xCoordinate, result.yCoordinate);
