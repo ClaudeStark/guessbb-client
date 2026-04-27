@@ -34,19 +34,19 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }
 
     credentials.current = {userId, token};
-    const socket = new SockJS(`${getApiDomain()}/ws`);
+    //const socket = new SockJS(`${getApiDomain()}/ws`);
     const client = new Client({
-      webSocketFactory: () => socket,
+      webSocketFactory: () => new SockJS(`${getApiDomain()}/ws`),
       connectHeaders: { userId, token },
       onConnect: () => {
         console.log("WebSocket Tunnel Established!");
         setIsConnected(true);
       },
+      reconnectDelay: 5000,
       onDisconnect: () => {
-        setIsConnected(false)
-        credentials.current = null;
-        console.log("WebSocket Disconnected");
-      },
+        setIsConnected(false);
+        console.log("WebSocket Disconnected — will retry in 5s");
+},
     });
 
     client.activate();
