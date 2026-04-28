@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/ClaudeStark/guessbb-client/compare/v1.1.0...v1.1.1) (2026-04-28)
+
+
+### Bug Fixes
+
+* changed url ([f7bb922](https://github.com/ClaudeStark/guessbb-client/commit/f7bb92223976368fbf02643d8774d56d51b01675))
+
 # [1.1.0](https://github.com/ClaudeStark/guessbb-client/compare/v1.0.0...v1.1.0) (2026-04-28)
 
 
