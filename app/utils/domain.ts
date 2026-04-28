@@ -7,7 +7,7 @@ import { isProduction } from "@/utils/environment";
  */
 export function getApiDomain(): string {
   const prodUrl = process.env.NEXT_PUBLIC_PROD_API_URL ||
-    "http://178.104.244.246"; // TODO: update with your production URL as needed.
+    "https://api.guessbb2.claudestark.ch"; // TODO: update with your production URL as needed.
   const devUrl = "http://localhost:8080";
   return isProduction() ? prodUrl : devUrl;
 }
