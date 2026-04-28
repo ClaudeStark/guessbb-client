@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/ClaudeStark/guessbb-client/compare/v1.0.0...v1.1.0) (2026-04-28)
+
+
+### Features
+
+* initial project setup ([c9a17c0](https://github.com/ClaudeStark/guessbb-client/commit/c9a17c003a65cb7f5470108b2353d27013b9fd62))
+
 # 1.0.0 (2026-04-27)
 
 
